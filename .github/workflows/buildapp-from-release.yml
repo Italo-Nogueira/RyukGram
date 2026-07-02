@@ -237,6 +237,7 @@ jobs:
                 gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1 || \
                 gh release create "$TAG" \
                   --repo "${{ github.repository }}" \
+                  --target main \
                   --title "$TAG" \
                   --notes ""
 
