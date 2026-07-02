@@ -228,14 +228,24 @@ jobs:
                 rm -rf "$INJECT_TMP"
 
                 mv packages/RyukGram-noplugins.ipa "packages/RyukGram_noplugins_v${VERSION}.ipa"
-                ls -la packages
+                ls -la 
+                
+            - name: Create release if it doesn't exist
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1 || \
+                gh release create "$TAG" \
+                  --repo "${{ github.repository }}" \
+                  --title "$TAG" \
+                  --notes ""
 
             - name: Upload sideload IPA to Release
               if: ${{ inputs.build_sideload }}
               env:
                 GH_TOKEN: ${{ github.token }}
               run: |
-                  gh release upload "$TAG" \
+                gh release upload "$TAG" \
                   "packages/RyukGram_sideloaded_v${VERSION}.ipa" \
                   --repo "${{ github.repository }}" \
                   --clobber
