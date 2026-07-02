@@ -49,7 +49,7 @@ jobs:
         name: Build RyukGram from Release
         runs-on: macos-latest
         permissions:
-            contents: read
+            contents: write
 
         steps:
             - name: Validate selection
@@ -230,18 +230,23 @@ jobs:
                 mv packages/RyukGram-noplugins.ipa "packages/RyukGram_noplugins_v${VERSION}.ipa"
                 ls -la packages
 
-            - name: Upload sideload IPA artifact
-              if: ${{ inputs.upload_artifact && inputs.build_sideload }}
-              uses: actions/upload-artifact@v4
-              with:
-                name: RyukGram_sideloaded_v${{ steps.tag.outputs.version }}
-                path: packages/RyukGram_sideloaded_v*.ipa
-                if-no-files-found: error
+            - name: Upload sideload IPA to Release
+              if: ${{ inputs.build_sideload }}
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh release upload "$TAG" \
+                  "packages/RyukGram_sideloaded_v${VERSION}.ipa" \
+                  --repo "${{ github.repository }}" \
+                  --clobber
 
-            - name: Upload no-plugins IPA artifact
-              if: ${{ inputs.upload_artifact && inputs.build_noplugins }}
-              uses: actions/upload-artifact@v4
-              with:
-                name: RyukGram_noplugins_v${{ steps.tag.outputs.version }}
-                path: packages/RyukGram_noplugins_v*.ipa
-                if-no-files-found: error
+            - name: Upload no-plugins IPA to Release
+              if: ${{ inputs.build_noplugins }}
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                gh release upload "$TAG" \
+                "packages/RyukGram_noplugins_v${VERSION}.ipa" \
+                --repo "${{ github.repository }}" \
+                --clobber
+
